@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reyon/topic.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
 class HomePage extends StatefulWidget {
@@ -13,6 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   late Future<List<Topic>> _futureTopicList;
+  late Uri link;
 
   @override
   void initState() {
@@ -24,7 +26,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Reyon Mobile"),
+        title: const Text("R10 İş Takip"),
+        actions: <Widget>[
+          PopupMenuButton<int>(
+            onSelected: (item) => menuClick(item),
+            itemBuilder: (context) => [
+              const PopupMenuItem<int>(value: 0, child: Text("Hakkında")),
+            ],
+          ),
+        ],
       ),
       body: Center(
         child: FutureBuilder<List<Topic>>(
@@ -53,14 +63,20 @@ class _HomePageState extends State<HomePage> {
       child: ListView.builder(
         itemCount: topicList.length,
         itemBuilder: (context, index) {
-          debugPrint("-> # $index");
+          return GestureDetector(
+            onDoubleTap: () async {
+              link = Uri.parse(topicList[index].link);
 
-          return ListTile(
-            title: Text(topicList[index].title),
-            subtitle: Text(topicList[index].date),
-            onTap: () {
-              //
+              if (await canLaunchUrl(link)) {
+                await launchUrl(link);
+              } else {
+                throw "Could not launch $link";
+              }
             },
+            child: ListTile(
+              title: Text(topicList[index].title),
+              subtitle: Text(topicList[index].date),
+            ),
           );
         },
       ),
@@ -88,8 +104,6 @@ class _HomePageState extends State<HomePage> {
       final decodeBody = utf8.decode(res.bodyBytes);
       List<dynamic> list = jsonDecode(decodeBody);
 
-      debugPrint(list.toString());
-
       for (var topic in list) {
         Topic t = Topic.fromJson(topic);
         topicList.add(t);
@@ -101,5 +115,24 @@ class _HomePageState extends State<HomePage> {
     } else {
       throw Exception("Topic bilgisi yuklenemidi");
     }
+  }
+
+  void menuClick(int item) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Hakkında"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
+                "R10 İş takip mobil uygulaması R10 iş forumlarının mobil ortamda gosterimi ve istenildiğinde ilgili forum konusuna ulaşılmasını sağlar."),
+            SizedBox(height: 20.0),
+            Text("Version: 0.7.0"),
+          ],
+        ),
+      ),
+    );
   }
 }
