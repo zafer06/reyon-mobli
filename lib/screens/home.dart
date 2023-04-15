@@ -60,25 +60,63 @@ class _HomePageState extends State<HomePage> {
       onRefresh: () {
         return fetchTopic();
       },
-      child: ListView.builder(
-        itemCount: topicList.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onDoubleTap: () async {
-              link = Uri.parse(topicList[index].link);
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: ListView.builder(
+          itemCount: topicList.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onDoubleTap: () async {
+                link = Uri.parse(topicList[index].link);
 
-              if (await canLaunchUrl(link)) {
-                await launchUrl(link);
-              } else {
-                throw "Could not launch $link";
-              }
-            },
-            child: ListTile(
-              title: Text(topicList[index].title),
-              subtitle: Text(topicList[index].date),
-            ),
-          );
-        },
+                if (await canLaunchUrl(link)) {
+                  await launchUrl(link);
+                } else {
+                  throw "Could not launch $link";
+                }
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 3.0),
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(stops: [
+                    0.001,
+                    0.009
+                  ], colors: [
+                    Color.fromARGB(213, 173, 173, 173),
+                    Color.fromARGB(255, 242, 242, 242)
+                  ]),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(2.0),
+                  ),
+                ),
+
+                /*
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 238, 238, 238),
+                  borderRadius: BorderRadius.circular(2),
+                  border: const Border(
+                    left: BorderSide(
+                        width: 8,
+                        color: Color.fromARGB(255, 182, 182, 182),
+                        style: BorderStyle.solid),
+                  ),
+                ),
+                */
+                child: ListTile(
+                  title: Text(topicList[index].title),
+                  subtitle: Text(topicList[index].user),
+                  trailing: Column(
+                    children: [
+                      Text(topicList[index].date),
+                      Text(topicList[index].time),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -94,22 +132,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<Topic>> fetchTopic() async {
-    Uri url = Uri.parse("https://solokod.com/reyon.json");
+    Uri url = Uri.parse("https://reyonapi.solokod.com/list");
 
-    final res = await http.get(url);
+    final res = await http.post(url);
 
     if (res.statusCode == 200) {
+      final decodeBody = utf8.decode(res.bodyBytes);
+      final body = json.decode(decodeBody) as Map<String, dynamic>;
+      final data = body["data"] as List<dynamic>;
+
       List<Topic> topicList = [];
 
-      final decodeBody = utf8.decode(res.bodyBytes);
-      List<dynamic> list = jsonDecode(decodeBody);
-
-      for (var topic in list) {
+      for (var topic in data) {
         Topic t = Topic.fromJson(topic);
         topicList.add(t);
       }
 
-      await Future.delayed(const Duration(seconds: 5));
+      //await Future.delayed(const Duration(seconds: 5));
 
       return topicList;
     } else {
