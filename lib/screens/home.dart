@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("R10 İş Takip"),
+        title: const Text("Reyon İş Takip"),
         actions: <Widget>[
           PopupMenuButton<int>(
             onSelected: (item) => menuClick(item),
@@ -78,15 +78,12 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 3.0),
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(stops: [
-                    0.001,
-                    0.009
-                  ], colors: [
-                    Color.fromARGB(213, 173, 173, 173),
-                    Color.fromARGB(255, 242, 242, 242)
-                  ]),
-                  borderRadius: BorderRadius.all(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    stops: const [0.001, 0.009],
+                    colors: selectBackColor(topicList[index]),
+                  ),
+                  borderRadius: const BorderRadius.all(
                     Radius.circular(2.0),
                   ),
                 ),
@@ -119,6 +116,22 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  List<Color> selectBackColor(Topic topic) {
+    //Duration diff = DateTime.now().difference(topic.datetime);
+
+    List<Color> colorList = [];
+
+    if (topic.date == "Bugün") {
+      colorList.add(const Color.fromARGB(213, 173, 173, 173));
+      colorList.add(const Color.fromARGB(255, 247, 252, 186));
+    } else {
+      colorList.add(const Color.fromARGB(213, 173, 173, 173));
+      colorList.add(const Color.fromARGB(255, 242, 242, 242));
+    }
+
+    return colorList;
   }
 
   Widget buildLoadingScreen() {
@@ -157,6 +170,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void menuClick(int item) {
+    String version = "0.7.1"; //Helper.getVersion();
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -164,11 +179,11 @@ class _HomePageState extends State<HomePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-                "R10 İş takip mobil uygulaması R10 iş forumlarının mobil ortamda gosterimi ve istenildiğinde ilgili forum konusuna ulaşılmasını sağlar."),
-            SizedBox(height: 20.0),
-            Text("Version: 0.7.0"),
+          children: [
+            const Text(
+                "Reyon İş takip mobil uygulaması R10 iş forumlarının mobil ortamda gosterimi ve istenildiğinde ilgili forum konusuna ulaşılmasını sağlar."),
+            const SizedBox(height: 20.0),
+            Text(version),
           ],
         ),
       ),

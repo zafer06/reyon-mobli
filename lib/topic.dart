@@ -6,6 +6,7 @@ class Topic {
   final String time;
   final String reply;
   final String description;
+  final DateTime datetime;
 
   const Topic({
     required this.title,
@@ -15,6 +16,7 @@ class Topic {
     required this.time,
     required this.reply,
     required this.description,
+    required this.datetime,
   });
 
   factory Topic.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class Topic {
       time: datetime[1],
       reply: json["reply"],
       description: json["description"],
+      datetime: DateTime.parse(json["date"]),
     );
   }
 
